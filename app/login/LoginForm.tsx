@@ -85,7 +85,13 @@ export default function LoginForm() {
         "supplier";
     }
 
-    router.push(role === "admin" ? "/admin/dashboard" : "/supplier/dashboard");
+    router.push(
+      role === "admin"
+        ? "/admin/dashboard"
+        : role === "employee"
+          ? "/employee/requisitions"
+          : "/supplier/dashboard",
+    );
   });
 
   return (

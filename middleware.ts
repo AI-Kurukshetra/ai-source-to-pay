@@ -24,8 +24,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname.startsWith("/admin");
   const isSupplierRoute = pathname.startsWith("/supplier");
+  const isEmployeeRoute = pathname.startsWith("/employee");
 
-  if (!isAdminRoute && !isSupplierRoute) {
+  if (!isAdminRoute && !isSupplierRoute && !isEmployeeRoute) {
     return NextResponse.next();
   }
 
@@ -64,7 +65,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const role =
-    (user.user_metadata?.role as "admin" | "supplier" | undefined) ??
+    (user.user_metadata?.role as "admin" | "supplier" | "employee" | undefined) ??
     null;
 
   if (!role) {
@@ -79,9 +80,13 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request);
   }
 
+  if (isEmployeeRoute && role !== "employee") {
+    return redirectToLogin(request);
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/supplier/:path*"],
+  matcher: ["/admin/:path*", "/supplier/:path*", "/employee/:path*"],
 };

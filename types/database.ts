@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type UserRole = "admin" | "supplier";
+export type UserRole = "admin" | "supplier" | "employee";
 export type SupplierApprovalStatus = "pending" | "approved" | "rejected";
 export type SupplierDocumentType =
   | "gst_certificate"
@@ -208,6 +208,48 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      purchase_requisitions: {
+        Row: {
+          id: string;
+          title: string;
+          item_name: string;
+          description: string;
+          quantity: number;
+          estimated_budget: number;
+          category: string;
+          urgency: "low" | "medium" | "high";
+          status: "draft" | "pending" | "approved" | "rejected";
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          item_name: string;
+          description: string;
+          quantity: number;
+          estimated_budget: number;
+          category: string;
+          urgency: "low" | "medium" | "high";
+          status?: "draft" | "pending" | "approved" | "rejected";
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          item_name?: string;
+          description?: string;
+          quantity?: number;
+          estimated_budget?: number;
+          category?: string;
+          urgency?: "low" | "medium" | "high";
+          status?: "draft" | "pending" | "approved" | "rejected";
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

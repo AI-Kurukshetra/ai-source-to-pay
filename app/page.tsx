@@ -7,7 +7,11 @@ export default async function Home() {
 
   if (session && role) {
     const destination =
-      role === "admin" ? "/admin/dashboard" : "/supplier/dashboard";
+      role === "admin"
+        ? "/admin/dashboard"
+        : role === "employee"
+          ? "/employee/requisitions"
+          : "/supplier/dashboard";
     redirect(destination);
   }
 
