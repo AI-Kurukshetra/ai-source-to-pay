@@ -81,7 +81,8 @@ export default function SupplierProfileForm({
     register,
     handleSubmit,
     setError,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<SupplierProfileFormValues>({
     defaultValues,
     mode: "onSubmit",
@@ -126,6 +127,7 @@ export default function SupplierProfileForm({
     }
 
     setSaved(true);
+    reset(values);
     setLoading(false);
     router.refresh();
   });
@@ -233,7 +235,7 @@ export default function SupplierProfileForm({
       <div className="md:col-span-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !isDirty}
           className="flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? <Spinner className="h-4 w-4" /> : null}
@@ -243,4 +245,3 @@ export default function SupplierProfileForm({
     </form>
   );
 }
-
