@@ -7,16 +7,17 @@ import { getSuppliers } from "@/lib/actions/adminActions";
 import { getSession } from "@/lib/auth/getSession";
 
 type AdminSuppliersPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     query?: string;
     status?: "pending" | "approved" | "rejected" | "all";
     sort?: "newest" | "oldest" | "name_asc" | "name_desc";
-  };
+  }>;
 };
 
 export default async function AdminSuppliersPage({
   searchParams,
 }: AdminSuppliersPageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
   const { session, role } = await getSession();
 
   if (!session || role !== "admin") {
@@ -24,12 +25,14 @@ export default async function AdminSuppliersPage({
   }
 
   const { data, error } = await getSuppliers({
-    query: searchParams?.query,
-    status: searchParams?.status,
-    sort: searchParams?.sort,
+    query: resolvedSearchParams.query,
+    status: resolvedSearchParams.status,
+    sort: resolvedSearchParams.sort,
   });
-  const statusValue = searchParams?.status ?? "all";
-  const sortValue = searchParams?.sort ?? "newest";
+  const statusValue = resolvedSearchParams.status ?? "all";
+  const sortValue = resolvedSearchParams.sort ?? "newest";
+  const missingIdCount =
+    data?.filter((supplier) => !(supplier as { id?: string }).id).length ?? 0;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#0b1326_0%,_#05070f_55%,_#020305_100%)] text-slate-100 md:grid md:grid-cols-[260px_1fr]">
@@ -49,7 +52,7 @@ export default async function AdminSuppliersPage({
             <input
               type="text"
               name="query"
-              defaultValue={searchParams?.query ?? ""}
+              defaultValue={resolvedSearchParams.query ?? ""}
               placeholder="Search by company, contact, GST, or email"
               className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
             />
@@ -80,6 +83,13 @@ export default async function AdminSuppliersPage({
               Apply
             </button>
           </form>
+          {missingIdCount > 0 ? (
+            <p className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+              {missingIdCount} supplier row(s) are missing an id. This usually
+              means the database schema for `public.suppliers` does not include
+              an `id` UUID column or your select is restricted.
+            </p>
+          ) : null}
           {error ? (
             <p className="text-sm text-rose-300">{error}</p>
           ) : data && data.length > 0 ? (
@@ -118,12 +128,18 @@ export default async function AdminSuppliersPage({
                         <ApprovalStatusBadge status={supplier.approval_status} />
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Link
-                          href={`/admin/suppliers/${supplier.id}`}
-                          className="text-sm font-semibold text-cyan-300 hover:text-cyan-200"
-                        >
-                          View
-                        </Link>
+                        {supplier.id ? (
+                          <Link
+                            href={`/admin/suppliers/${supplier.id}`}
+                            className="text-sm font-semibold text-cyan-300 hover:text-cyan-200"
+                          >
+                            View
+                          </Link>
+                        ) : (
+                          <span className="text-sm text-slate-500">
+                            Missing id
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}

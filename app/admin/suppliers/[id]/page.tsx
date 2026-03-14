@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 
 import ApprovalStatusBadge from "@/components/dashboard/ApprovalStatusBadge";
 import AdminSidebar from "@/components/dashboard/AdminSidebar";
-import { approveSupplier, getSupplierDetail, rejectSupplier } from "@/lib/actions/adminActions";
+import SupplierApprovalActions from "@/components/dashboard/SupplierApprovalActions";
+import { getSupplierDetail } from "@/lib/actions/adminActions";
 import { getSession } from "@/lib/auth/getSession";
 
 const documentLabels: Record<string, string> = {
@@ -23,15 +24,25 @@ function formatDateUtc(value: string) {
 export default async function AdminSupplierDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const resolvedParams = await params;
   const { session, role } = await getSession();
 
   if (!session || role !== "admin") {
     redirect("/login");
   }
 
-  const { data, error } = await getSupplierDetail(params.id);
+  // Guard against bad links like `/admin/suppliers/undefined`.
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      resolvedParams.id,
+    );
+  if (!isUuid) {
+    redirect("/admin/suppliers");
+  }
+
+  const { data, error } = await getSupplierDetail(resolvedParams.id);
 
   if (error || !data) {
     return (
@@ -112,34 +123,10 @@ export default async function AdminSupplierDetailPage({
         <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-lg font-semibold">Uploaded documents</h2>
-            <div className="flex flex-wrap gap-3">
-              <form
-                action={async () => {
-                  "use server";
-                  await approveSupplier(supplier.id);
-                }}
-              >
-                <button
-                  type="submit"
-                  className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-                >
-                  Approve
-                </button>
-              </form>
-              <form
-                action={async () => {
-                  "use server";
-                  await rejectSupplier(supplier.id);
-                }}
-              >
-                <button
-                  type="submit"
-                  className="rounded-lg border border-rose-500/40 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/10"
-                >
-                  Reject
-                </button>
-              </form>
-            </div>
+            <SupplierApprovalActions
+              supplierId={supplier.id}
+              approvalStatus={supplier.approval_status}
+            />
           </div>
           {documents.length > 0 ? (
             <div className="mt-4 overflow-hidden rounded-xl border border-slate-800">

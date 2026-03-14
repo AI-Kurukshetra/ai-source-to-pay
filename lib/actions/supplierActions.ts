@@ -70,10 +70,11 @@ export async function createSupplierProfile(input: SupplierProfileInput) {
 export async function getSupplierDashboardData() {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) {
+  if (userError || !user) {
     return { error: "You must be signed in.", data: null };
   }
 
@@ -82,7 +83,7 @@ export async function getSupplierDashboardData() {
     .select(
       "id, company_name, contact_person, phone, address, gst_number, business_type, product_categories, approval_status, created_at",
     )
-    .eq("user_id", session.user.id)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   if (supplierError || !supplier) {
@@ -114,10 +115,11 @@ export async function getSupplierDashboardData() {
 export async function getSupplierProfile() {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) {
+  if (userError || !user) {
     return { error: "You must be signed in.", data: null };
   }
 
@@ -126,7 +128,7 @@ export async function getSupplierProfile() {
     .select(
       "id, company_name, contact_person, phone, address, gst_number, business_type, product_categories, approval_status, created_at",
     )
-    .eq("user_id", session.user.id)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   if (error || !supplier) {
@@ -144,10 +146,11 @@ export async function updateSupplierProfile(
 ) {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) {
+  if (userError || !user) {
     return { error: "You must be signed in." };
   }
 
@@ -162,10 +165,10 @@ export async function updateSupplierProfile(
       business_type: input.business_type,
       product_categories: input.product_categories,
     })
-    .eq("user_id", session.user.id);
+    .eq("user_id", user.id);
 
   if (error) {
-    return { error: "Unable to update supplier profile." };
+    return { error: error.message ?? "Unable to update supplier profile." };
   }
 
   return { error: null };

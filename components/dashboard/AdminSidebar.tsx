@@ -39,7 +39,8 @@ export default function AdminSidebar() {
       </div>
       <nav className="flex flex-1 flex-col gap-2 text-sm">
         {links.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive =
+            pathname === link.href || pathname.startsWith(`${link.href}/`);
           return (
             <Link
               key={link.href}

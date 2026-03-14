@@ -1,6 +1,7 @@
 import ApprovalStatusBadge from "@/components/dashboard/ApprovalStatusBadge";
 import SupplierSidebar from "@/components/dashboard/SupplierSidebar";
-import { getSupplierProfile, updateSupplierProfile } from "@/lib/actions/supplierActions";
+import SupplierProfileForm from "@/components/forms/SupplierProfileForm";
+import { getSupplierProfile } from "@/lib/actions/supplierActions";
 
 export default async function SupplierProfilePage() {
   const { data: supplier, error } = await getSupplierProfile();
@@ -35,113 +36,17 @@ export default async function SupplierProfilePage() {
           <p className="text-sm text-slate-300">
             Review and update your supplier information.
           </p>
-          <form
-            action={async (formData) => {
-              "use server";
-              const productCategories = String(
-                formData.get("product_categories") ?? "",
-              )
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean);
-
-              await updateSupplierProfile({
-                company_name: String(formData.get("company_name") ?? ""),
-                contact_person: String(formData.get("contact_person") ?? ""),
-                phone: String(formData.get("phone") ?? ""),
-                address: String(formData.get("address") ?? ""),
-                gst_number: String(formData.get("gst_number") ?? ""),
-                business_type: String(formData.get("business_type") ?? ""),
-                product_categories: productCategories,
-              });
+          <SupplierProfileForm
+            initialValues={{
+              company_name: supplier.company_name,
+              contact_person: supplier.contact_person,
+              phone: supplier.phone,
+              address: supplier.address,
+              gst_number: supplier.gst_number,
+              business_type: supplier.business_type,
+              product_categories: supplier.product_categories,
             }}
-            className="mt-6 grid gap-5 md:grid-cols-2"
-          >
-            <div>
-              <label className="text-sm font-medium text-slate-200">
-                Company name
-              </label>
-              <input
-                name="company_name"
-                defaultValue={supplier.company_name}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-200">
-                Contact person
-              </label>
-              <input
-                name="contact_person"
-                defaultValue={supplier.contact_person}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-200">Phone</label>
-              <input
-                name="phone"
-                defaultValue={supplier.phone}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-200">
-                GST / Tax ID
-              </label>
-              <input
-                name="gst_number"
-                defaultValue={supplier.gst_number}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-200">
-                Business type
-              </label>
-              <input
-                name="business_type"
-                defaultValue={supplier.business_type}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-200">
-                Product categories
-              </label>
-              <input
-                name="product_categories"
-                defaultValue={supplier.product_categories.join(", ")}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="text-sm font-medium text-slate-200">
-                Address
-              </label>
-              <textarea
-                name="address"
-                defaultValue={supplier.address}
-                rows={3}
-                className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <button
-                type="submit"
-                className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-white"
-              >
-                Save changes
-              </button>
-            </div>
-          </form>
+          />
         </section>
       </main>
     </div>

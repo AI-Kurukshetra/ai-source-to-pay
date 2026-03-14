@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin() {
@@ -35,6 +37,9 @@ export async function approveSupplier(id: string) {
     return { error: updateError.message ?? "Unable to approve supplier." };
   }
 
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/suppliers");
+  revalidatePath(`/admin/suppliers/${id}`);
   return { error: null };
 }
 
@@ -53,7 +58,36 @@ export async function rejectSupplier(id: string) {
     return { error: updateError.message ?? "Unable to reject supplier." };
   }
 
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/suppliers");
+  revalidatePath(`/admin/suppliers/${id}`);
   return { error: null };
+}
+
+type ActionState = { error: string | null };
+
+export async function approveSupplierAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supplierId = String(formData.get("supplierId") ?? "");
+  if (!supplierId) {
+    return { error: "Missing supplier id." };
+  }
+  const result = await approveSupplier(supplierId);
+  return { error: result.error ?? null };
+}
+
+export async function rejectSupplierAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supplierId = String(formData.get("supplierId") ?? "");
+  if (!supplierId) {
+    return { error: "Missing supplier id." };
+  }
+  const result = await rejectSupplier(supplierId);
+  return { error: result.error ?? null };
 }
 
 export async function getAdminDashboardStats() {
@@ -154,7 +188,10 @@ export async function getSupplierDetail(id: string) {
     .single();
 
   if (supplierError || !supplier) {
-    return { error: "Supplier not found.", data: null };
+    return {
+      error: supplierError?.message ?? "Supplier not found.",
+      data: null,
+    };
   }
 
   const { data: documents, error: documentsError } = await supabase
@@ -164,7 +201,10 @@ export async function getSupplierDetail(id: string) {
     .order("uploaded_at", { ascending: false });
 
   if (documentsError) {
-    return { error: "Unable to load supplier documents.", data: null };
+    return {
+      error: documentsError.message ?? "Unable to load supplier documents.",
+      data: null,
+    };
   }
 
   return {

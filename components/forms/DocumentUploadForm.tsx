@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { uploadDocument } from "@/lib/actions/documentActions";
+import Spinner from "@/components/ui/Spinner";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 const allowedTypes = ["application/pdf", "image/jpeg", "image/png"] as const;
@@ -206,8 +207,11 @@ export default function DocumentUploadForm({
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {loading ? (
+          <Spinner className="h-4 w-4 border-slate-950/20 border-t-slate-950" />
+        ) : null}
         {loading ? "Uploading..." : "Upload document"}
       </button>
 

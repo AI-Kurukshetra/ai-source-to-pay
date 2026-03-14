@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { createSupplierProfile } from "@/lib/actions/supplierActions";
+import Spinner from "@/components/ui/Spinner";
 
 // Validation schema for supplier registration details.
 const supplierRegisterSchema = z.object({
@@ -319,8 +320,11 @@ export default function SupplierRegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {loading ? (
+          <Spinner className="h-4 w-4 border-slate-950/20 border-t-slate-950" />
+        ) : null}
         {loading ? "Submitting..." : "Submit registration"}
       </button>
     </form>
